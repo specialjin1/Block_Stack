@@ -76,7 +76,7 @@ int left_right_move(void)
 		Sleep(100);	// 블록이 좌우로 움직이는 속도를 조절
 		gotoxy(x,y);
 		printf("  ");
-	} while(!key);
+	} while(key!=32);
 	return x;
 }
 void move_down(int y)
