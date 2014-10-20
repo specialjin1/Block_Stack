@@ -1,14 +1,15 @@
 #include "BlockGame.h"
 char block_shape[4][4] = {"◇","☆","○","□"};
-int block_stack[box_length*2+2] = {0,};
+int block_stack[box_length*2+2] = {0,};			// 일정 위치에 쌓인 도형의 개수
+int newblock_stack[4][box_length*2+2] = {0,};	// 모양별로 쌓인 스택의 개수
 int x,y;
 int key;
-
+int random;
 void intro_game(void)
 {
 	system("cls");
 	printf("블록 쌓기 \n\n");
-	printf("블록이 좌우로 움직일 떄 스페이스키를 누르면\n");
+	printf("블록이 좌우로 움직일 때 스페이스키를 누르면\n");
 	printf("블록이 떨어져 바닥에 쌓입니다. \n\n");
 	printf("아무키나 누르면 게임을 시작합니다. \n");
 	getch();
@@ -23,7 +24,7 @@ void game_control(void)
 {
 	int count=1,status;
 	pthread_t thread;
-	
+
 	system("cls");
 	draw_rectangle(box_length, box_height);
 	gotoxy(box_length*2+5,3);
@@ -33,8 +34,9 @@ void game_control(void)
 	printf("바닥에 쌓입니다.\n");
 	pthread_create(&thread,NULL,Input_direct,NULL);
 	pthread_detach(thread);
-	while(count < box_height)
+	while(count <= box_height)
 	{
+		random = rand()%4;
 		gotoxy(box_length*2+5,4);
 		printf("시도한 횟수 : %2d",count);
 		gotoxy(box_length*2+5,5);
@@ -43,11 +45,11 @@ void game_control(void)
 		for(y=2;y<box_height+2-block_stack[x];y++)
 		{
 			move_down(y);
-			//key=0;
 		}
 		gotoxy(x, box_height+1-block_stack[x]);
-		printf("□");
+		printf("%s",block_shape[random]);
 		block_stack[x]+=1;
+		newblock_stack[random][x]++;
 		count++;
 		//getch();
 	}
@@ -72,7 +74,7 @@ int left_right_move(void)
 		}
 
 		gotoxy(x,y);
-		printf("□");
+		printf("%s",block_shape[random]);
 		Sleep(100);	// 블록이 좌우로 움직이는 속도를 조절
 		gotoxy(x,y);
 		printf("  ");
@@ -95,7 +97,7 @@ void move_down(int y)
 	}
 	else key=0;
 	gotoxy(x,y);
-	printf("□");
+	printf("%s",block_shape[random]);
 	Sleep(50);
 	gotoxy(x,y);
 	printf("  ");
@@ -129,11 +131,14 @@ void draw_rectangle(int c, int r)
 }
 int max_block(void)
 {
-	int i, max=0;
-	for(i=1;i<=box_height*2+1;i++)
+	int i,j,max=0;
+	for(i=0;i<4;i++)
 	{
-		if(max<=block_stack[i])
-			max = block_stack[i];
+		for(j=1;j<=box_height*2+1;j++)
+		{
+			if(max<=newblock_stack[i][j])
+				max = newblock_stack[i][j];
+		}
 	}
 	return max;
 }
